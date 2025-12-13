@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>IDK</title><style>blockquote,body,dd,dl,fieldset,figure,form,h1,h2,h3,h4,h5,h6,hr,menu,ol,p,pre,ul{margin:0}fieldset,legend,menu,ol,ul{padding:0}address,b,cite,code,dfn,em,h1,h2,h3,h4,h5,h6,i,kbd,pre,samp,small,strong,sub,sup,th,var{font:inherit}*{min-width:0}body{min-height:100vh;text-rendering:optimizeSpeed;line-height:1.5;font-family:Arial,sans-serif;margin:0;padding:0;background-color:#000;color:#fff}html:focus-within{scroll-behavior:smooth}a:not([class]){text-decoration-skip-ink:auto}img,picture{max-width:100%;display:block}table{border-collapse:collapse}ol[role=list],ul[role=list]{list-style:none}@media (prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,::after,::before{animation-duration:0s!important;animation-iteration-count:1!important;transition-duration:0s!important;scroll-behavior:auto!important}}#bg-code{position:fixed;inset:0;z-index:-10;white-space:collapse;color:green;background:#000;overflow:hidden;font-family:monospace;font-size:24px;user-select:none;line-height:1.5;letter-spacing:24px;pointer-events:none;filter:blur(3px);animation:4s ease-in-out infinite glowshift,30s ease-in-out infinite wave}@keyframes glowshift{0%,100%{opacity:.6}50%{opacity:.9}}@keyframes wave{0%,100%{transform:scaleX(1.2) scaleY(1.5) scaleZ(1.2);rotate:5deg}50%{transform:scaleX(1) scaleY(1.2) scaleZ(.8);rotate:-5deg}}</style></head><body><pre id="bg-code">import express from "express";
+import compression from "compression";
+import path from "path";
+import helmet from "helmet";
+
+const app = express();
+const PORT = process.env.PORT;
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "default-src": ["'self'"],
+      "script-src": ["'self'", "'unsafe-inline'"],
+      "style-src": ["'self'", "'unsafe-inline'"],
+      "img-src": ["'self'", "data:"],
+    },
+  },
+}));
+
+const poweredBy = [
+  "Caffeine",
+  "TypeScript",
+  "Sleep Deprivation",
+  "Quantum Tunneling",
+  "Dark Matter",
+  "Unicorn Dust",
+  "Pixel Magic",
+  "Code Goblins",
+  "Electric Eels",
+  "Cosmic Rays",
+];
+
+app.use((req, res, next) =&gt; {
+  const random = poweredBy[Math.floor(Math.random() * poweredBy.length)];
+  res.setHeader("X-Powered-By", random);
+  next();
+});
+
+app.use(compression());
+
+app.get("/", (req, res) =&gt; {
+  res.set("Cache-Control", "no-store");
+  res.sendFile("./index.inline.html", { root: path.join(__dirname, "..", "public") });
+});
+
+app.get("/favicon.ico", (req, res) =&gt; {
+  res.sendFile("./favicon.ico", { root: path.join(__dirname, "..", "public") });
+});
+
+app.listen(PORT, () =&gt; {
+  console.log(`Server is running on port ${PORT}`);
+});</pre><script>const canvas=document.createElement("canvas");canvas.id="snow",canvas.style.position="fixed",canvas.style.top="0",canvas.style.left="0",canvas.style.width="100%",canvas.style.height="100%",canvas.style.zIndex="-1",document.body.appendChild(canvas);const ctx=canvas.getContext("2d");let width,height;const resize=()=>{width=canvas.width=window.innerWidth,height=canvas.height=window.innerHeight};window.addEventListener("resize",resize),window.addEventListener("keydown",e=>{"ArrowLeft"!==e.key&&"a"!==e.key.toLowerCase()||(player.movingLeft=!0),"ArrowRight"!==e.key&&"d"!==e.key.toLowerCase()||(player.movingRight=!0),"Shift"===e.key&&(player.running=!0)}),window.addEventListener("keyup",e=>{"ArrowLeft"!==e.key&&"a"!==e.key.toLowerCase()||(player.movingLeft=!1),"ArrowRight"!==e.key&&"d"!==e.key.toLowerCase()||(player.movingRight=!1),"Shift"===e.key&&(player.running=!1)}),resize();const flakes=Array.from({length:200},()=>({x:Math.random()*width,y:Math.random()*height,radius:2*Math.random()+2,speed:1*Math.random()+.5,color:`hsl(${Math.floor(360*Math.random())}, ${20*Math.random()+50}%, ${20*Math.random()+80}%)`,phase:Math.random()*Math.PI*2,amplitude:1.5*Math.random()+.5})),player={x:width/2-40,y:height-40,width:80,height:10,speed:7,movingLeft:!1,movingRight:!1,running:!1,runningSpeed:12};let score=0;const draw=()=>{ctx.clearRect(0,0,width,height);for(const e of flakes)ctx.beginPath(),ctx.fillStyle=e.color,ctx.moveTo(e.x,e.y),ctx.arc(e.x,e.y,e.radius,0,2*Math.PI),ctx.fill();ctx.fillStyle="green",ctx.fillRect(player.x,player.y,player.width,player.height),ctx.fillStyle="#fff",ctx.font="16px monospace",ctx.fillText(`Score: ${score}`,10,25)},update=()=>{player.movingLeft&&(player.x-=player.running?player.runningSpeed:player.speed),player.movingRight&&(player.x+=player.running?player.runningSpeed:player.speed),player.x=Math.max(0,Math.min(width-player.width,player.x));const e=Date.now()/1e3;for(const t of flakes)t.y+=t.speed,t.x+=Math.sin(1.5*e+t.phase)*t.amplitude,t.y+t.radius>player.y&&t.x>player.x&&t.x<player.x+player.width&&(score++,t.y=-t.radius,t.x=Math.random()*width),t.y>height&&(t.y=-t.radius,t.x=Math.random()*width),t.x<-t.radius&&(t.x=width+t.radius),t.x>width+t.radius&&(t.x=-t.radius)};(loop=()=>{update(),draw(),requestAnimationFrame(loop)})();</script></body></html>
