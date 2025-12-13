@@ -1,0 +1,37 @@
+@import "./reset.css";
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  color: white;
+}
+
+#bg-code {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  white-space: collapse;
+  color: green;
+  background: black;
+  overflow: hidden;
+  font-family: monospace;
+  font-size: 24px;
+  user-select: none;
+  line-height: 1.5;
+  letter-spacing: 24px;
+  pointer-events: none;
+  filter: blur(3px);
+  animation: glowshift 4s ease-in-out infinite, wave 30s ease-in-out infinite;
+}
+
+@keyframes glowshift {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes wave {
+  0%, 100% { transform: scaleX(1.2) scaleY(1.5) scaleZ(1.2); rotate: 5deg; }
+  50% { transform: scaleX(1) scaleY(1.2) scaleZ(0.8); rotate: -5deg; }
+}
