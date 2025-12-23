@@ -1,107 +1,106 @@
-const canvas = document.createElement("canvas");
-canvas.id = "snow";
-canvas.style.position = "fixed";
-canvas.style.top = "0";
-canvas.style.left = "0";
-canvas.style.width = "100%";
-canvas.style.height = "100%";
-canvas.style.zIndex = "-1";
-document.body.appendChild(canvas);
+import { Game } from "../core/engine";
 
-const ctx = canvas.getContext("2d");
-let width, height;
-
-const resize = () => {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-};
-window.addEventListener("resize", resize);
-window.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") player.movingLeft = true;
-  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") player.movingRight = true;
-  if (e.key === "Shift") player.running = true;
-});
-window.addEventListener("keyup", (e) => {
-  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") player.movingLeft = false;
-  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") player.movingRight = false;
-  if (e.key === "Shift") player.running = false;
-});
-resize();
-
-const flakes = Array.from({ length: 200 }, () => ({
-  x: Math.random() * width,
-  y: Math.random() * height,
-  radius: Math.random() * 2 + 2,
-  speed: Math.random() * 1 + 0.5,
-  color: `hsl(${Math.floor(Math.random() * 360)}, ${Math.random() * 20 + 50}%, ${Math.random() * 20 + 80}%)`,
-  phase: Math.random() * Math.PI * 2,
-  amplitude: Math.random() * 1.5 + 0.5,
-}));
-
-const player = {
-  x: width / 2 - 40,
-  y: height - 40,
-  width: 80,
-  height: 10,
-  speed: 7,
-  movingLeft: false,
-  movingRight: false,
-  running: false,
-  runningSpeed: 12,
-};
-
-let score = 0;
-
-const draw = () => {
-  ctx.clearRect(0, 0, width, height);
-
-  for (const flake of flakes) {
-    ctx.beginPath();
-    ctx.fillStyle = flake.color;
-    ctx.moveTo(flake.x, flake.y);
-    ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
-    ctx.fill();
+class Player {
+  constructor(width, height) {
+    this.width = 80;
+    this.height = 10;
+    this.x = width / 2 - this.width / 2;
+    this.y = height - 40;
+    this.speed = 7 * 60;
+    this.runningSpeed = 12 * 60;
   }
 
-  ctx.fillStyle = "green";
-  ctx.fillRect(player.x, player.y, player.width, player.height);
+  update(dt, game) {
+    const movingRight = game.input.isAny("arrowright", "d");
+    const movingLeft = game.input.isAny("arrowleft", "a");
+    const running = game.input.isDown("shift");
+    const s = movingRight || movingLeft ? (running ? this.runningSpeed : this.speed) : 0;
 
-  ctx.fillStyle = "#fff";
-  ctx.font = "16px monospace";
-  ctx.fillText(`Score: ${score}`, 10, 25);
-};
+    if (movingLeft) this.x -= s * dt;
+    if (movingRight) this.x += s * dt;
 
-const update = () => {
-  if (player.movingLeft) player.x -= player.running ? player.runningSpeed : player.speed;
-  if (player.movingRight) player.x += player.running ? player.runningSpeed : player.speed;
-  player.x = Math.max(0, Math.min(width - player.width, player.x));
-  
-  const t = Date.now() / 1000;
-  for (const flake of flakes) {
-    flake.y += flake.speed;
-    flake.x += Math.sin(t * 1.5 + flake.phase) * flake.amplitude;
+    const { canvas } = game;
+    this.x = Math.max(0, Math.min(canvas.width - this.width, this.x));
+  }
+
+  draw(ctx) {
+    ctx.fillStyle = "green";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
+}
+
+class Flake {
+  constructor(width, height) {
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    this.radius = Math.random() * 2 + 2;
+    this.speed = (Math.random() * 1 + 0.5) * 60;
+    this.color = `hsl(${Math.floor(Math.random() * 360)}, ${
+      Math.random() * 20 + 50
+    }%, ${Math.random() * 20 + 80}%)`;
+    this.phase = Math.random() * Math.PI * 2;
+    this.amplitude = (Math.random() * 1.5 + 0.5) * 60;
+  }
+
+  update(dt, game) {
+    const { canvas, player } = game;
+    const t = performance.now() / 1000;
+
+    this.y += this.speed * dt;
+    this.x += Math.sin(t * 1.5 + this.phase) * this.amplitude * dt;
 
     if (
-      flake.y + flake.radius > player.y &&
-      flake.x > player.x &&
-      flake.x < player.x + player.width
+      this.y + this.radius > player.y &&
+      this.x > player.x &&
+      this.x < player.x + player.width
     ) {
-      score++;
-      flake.y = -flake.radius;
-      flake.x = Math.random() * width;
+      game.score++;
+      this.y = -this.radius;
+      this.x = Math.random() * canvas.width;
     }
 
-    if (flake.y > height) {
-      flake.y = -flake.radius;
-      flake.x = Math.random() * width;
+    if (this.y > canvas.height) {
+      this.y = -this.radius;
+      this.x = Math.random() * canvas.width;
     }
-    if (flake.x < -flake.radius) flake.x = width + flake.radius;
-    if (flake.x > width + flake.radius) flake.x = -flake.radius;
+    if (this.x < -this.radius) this.x = canvas.width + this.radius;
+    if (this.x > canvas.width + this.radius) this.x = -this.radius;
   }
-};
 
-(loop = () => {
-  update();
-  draw();
-  requestAnimationFrame(loop);
-})();
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.fillStyle = this.color;
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+const game = new Game({
+  id: "snow",
+  zIndex: -1,
+  showFPS: true,
+  vsyncStep: 1,
+});
+game.score = 0;
+
+const player = new Player(game.canvas.width, game.canvas.height);
+game.player = player;
+game.add(player);
+
+for (let i = 0; i < 200; i++) {
+  game.add(new Flake(game.canvas.width, game.canvas.height));
+}
+
+game.addDrawHook((ctx, g) => {
+  ctx.fillStyle = "white";
+  ctx.font = "16px monospace";
+  ctx.fillText(`Score: ${g.score ?? 0}`, 10, 40);
+});
+
+game.addUpdateHook((dt, g) => {
+  if (g.debug) console.log("Frame Δt:", dt.toFixed(3));
+});
+
+game.addResizeHook((g) => {
+  player.y = g.canvas.height - 40;
+});

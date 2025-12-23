@@ -1,20 +1,28 @@
 import { readFileSync, writeFileSync } from "fs";
 import { minify as minifyHTML } from "html-minifier-terser";
 import CleanCSS from "clean-css";
-import { minify } from "terser";
+import * as esbuild from "esbuild";
 
 async function build() {
   const html = readFileSync("src/views/index.html", "utf8");
   const cssMain = readFileSync("src/styles/main.css", "utf8");
   const cssReset = readFileSync("src/styles/reset.css", "utf8");
-  const js = readFileSync("src/scripts/client.js", "utf8");
   const appTs = readFileSync("src/app.ts", "utf8");
 
   const minifiedCSS = new CleanCSS({ level: 2 }).minify(
     cssReset + "\n" + cssMain
   ).styles;
 
-  const minifiedJS = (await minify(js, { compress: true, mangle: true })).code;
+  const result = await esbuild.build({
+    entryPoints: ["src/scripts/client.js"],
+    bundle: true,
+    format: "iife",
+    write: false,
+    minify: true,
+    platform: "browser",
+  })
+
+  const minifiedJS = result.outputFiles[0].text;
 
   const codeBackground = `<pre id="bg-code">${
     appTs
