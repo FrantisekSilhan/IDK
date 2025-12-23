@@ -61,11 +61,6 @@ export class Game {
     const canvas = document.createElement("canvas");
     canvas.id = id;
     Object.assign(canvas.style, {
-      position: "fixed",
-      top: "0",
-      left: "0",
-      width: "100%",
-      height: "100%",
       zIndex: this.config.zIndex ?? "0",
       display: "block",
     });
@@ -117,8 +112,23 @@ export class Game {
 
   resize() {
     const { innerWidth: w, innerHeight: h } = window;
-    this.canvas.width = w;
-    this.canvas.height = h;
+
+    if (this.render.aspectRatio) {
+      const targetRatio = this.render.aspectRatio;
+      let newWidth = w;
+      let newHeight = h;
+      if (w / h > targetRatio) {
+        newWidth = h * targetRatio;
+      } else {
+        newHeight = w / targetRatio;
+      }
+      this.canvas.width = newWidth;
+      this.canvas.height = newHeight;
+    } else {
+      this.canvas.width = w;
+      this.canvas.height = h;
+    }
+
     for (const fn of this.hooks.resize) fn(this);
   }
 
